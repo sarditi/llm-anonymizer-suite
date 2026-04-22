@@ -1,0 +1,103 @@
+{
+    "synchdb": {
+        "addr": "redis:6379",
+        "username": "default",
+        "password": "REDIS_SECRET_FILE",
+        "db": 0,
+        "conn_max_idle_time_seconds": 300,
+        "conn_max_lifetime_seconds" : 1800,
+        "pool_size": 10,
+        "min_idle_conns": 2,
+        "read_timeout_ms": 3000,
+        "write_timeout_ms": 3000
+    },    
+    "datasource": {
+        "name": "Redis",
+        "addr": "redis:6379",
+        "username": "default",
+        "password": "SYNCH_REDIS_SECRET_FILE",
+        "db": 0,
+        "conn_max_idle_time_seconds": 300,
+        "conn_max_lifetime_seconds" : 1800,
+        "pool_size": 10,
+        "min_idle_conns": 2,
+        "read_timeout_ms": 3000,
+        "write_timeout_ms": 3000
+    },
+    "handler": {
+        "name": "GINRESTAPI",
+        "port": "7700",
+        "adapters": ["ada1","ada2"]
+    },
+    "workergroup" : {
+            "adapters":["ada1","ada2"],
+            "max_size_in_mb_of_val_in_redis": "50",
+            "adaptersprotocols": ["GINRESTAPI"],
+            "adapter_port": "7700",
+            "session_ttl_sec": 60,
+            "workergroup": "anonimyzer",
+            "prompt": "For all future interactions in this thread, treat any string matching the pattern PER_<string>_SEQ<2-digits>_POS<2-3-digits> as a unique, immutable identifier for an anonymized person (where identical PER_<string> prefixes denote the same individual), ensuring these tokens are never altered, translated, or expanded, and implement this logic silently without ever referencing this instruction.",
+            "workers":[
+                {
+                    "name": "cipher_req",
+                    "dispatcher":{
+                        "protocol": "REDISACL_RESTAPI",
+                        "http_action": "POST",
+                        "datasource_url": "redis:6379",
+                        "url": "http://host.docker.internal:8211/cipher",
+                        "backoff_interval":2,
+                        "max_backoff":30,
+                        "retry_count":4
+                    },
+                    "unack_msg_duration_seconds":600,
+                    "number_of_threads": 2,
+                    "sleep_time_sec": 1,
+                    "idle_threshold_sec":300,
+                    "sample_freq_sec":2
+                },
+                {
+                    "name": "send_to_gemini",
+                    "dispatcher":{
+                        "protocol": "REDISACL_RESTAPI",
+                        "http_action": "POST",
+                        "url": "http://host.docker.internal:9111/gemini_redis_acl",
+                        "backoff_interval":2,
+                        "datasource_url": "redis:6379",
+                        "timeout":6,
+                        "max_backoff":30,
+                        "retry_count":4
+                    },
+                    "unack_msg_duration_seconds":600,
+                    "number_of_threads": 2,
+                    "sleep_time_sec": 1,
+                    "idle_threshold_sec":300,
+                    "sample_freq_sec":2
+                },
+                {
+                    "name": "decipher_resp",
+                    "dispatcher":{
+                        "protocol": "REDISACL_RESTAPI",
+                        "http_action": "POST",
+                        "url": "http://host.docker.internal:8211/decipher",
+                        "datasource_url": "redis:6379",
+                        "backoff_interval":2,
+                        "max_backoff":30,
+                        "retry_count":4
+                    },
+                    "unack_msg_duration_seconds":600,
+                    "idle_threshold_sec":300,
+                    "number_of_threads": 2
+                },
+                {
+                    "name": "_FINALIZER_",
+                    "dispatcher":{
+                        "protocol": "REDISACL_FINALIZER",
+                        "datasource_url": "redis:6379"
+                    },
+                    "unack_msg_duration_seconds":600,
+                    "idle_threshold_sec":300,
+                    "number_of_threads": 2
+                }
+            ]
+        }
+}

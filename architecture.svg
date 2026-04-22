@@ -1,0 +1,292 @@
+<svg viewBox="0 0 1320 920" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">
+<style>
+  .svc-box { fill: rgba(255,255,255,0.8); stroke: #1a1a1a; stroke-width: 1.2; }
+  .svc-box-gateway { fill: rgba(255,255,255,0.9); stroke: #2c5478; stroke-width: 1.8; }
+  .svc-box-cipher  { fill: rgba(255,255,255,0.9); stroke: #a67c2e; stroke-width: 1.8; }
+  .svc-box-mediator{ fill: rgba(255,255,255,0.9); stroke: #5d4b7a; stroke-width: 1.8; }
+  .svc-box-redis   { fill: #fcf3e3; stroke: #b33a3a; stroke-width: 1.8; }
+  .svc-box-frontend{ fill: rgba(255,255,255,0.9); stroke: #3a7566; stroke-width: 1.6; stroke-dasharray: 4 3; }
+  .svc-header { font-family: Georgia, 'Fraunces', serif; font-weight: 600; font-style: italic; font-size: 14px; fill: #1a1a1a; }
+  .svc-port { font-size: 9px; fill: #6a6258; letter-spacing: 0.08em; }
+  .svc-caption { font-size: 9.5px; fill: #3a3a3a; }
+  .inner-box { fill: none; stroke: #6a6258; stroke-width: 0.6; stroke-dasharray: 2 2; }
+  .inner-label { font-size: 9px; fill: #3a3a3a; }
+  .flow-line-solid { fill: none; stroke: #1a1a1a; stroke-width: 1; }
+  .flow-line-stream{ fill: none; stroke: #b33a3a; stroke-width: 1.2; }
+  .flow-line-http  { fill: none; stroke: #2c5478; stroke-width: 1; stroke-dasharray: 4 2; }
+  .flow-line-acl   { fill: none; stroke: #a67c2e; stroke-width: 1; stroke-dasharray: 1 2; }
+  .flow-line-ghost { fill: none; stroke: #6a6258; stroke-width: 0.8; stroke-dasharray: 1 3; }
+  .flow-label { font-size: 8.5px; fill: #1a1a1a; letter-spacing: 0.04em; }
+  .flow-label-bg { fill: #f4f1ea; }
+  .stage-badge { fill: rgba(44, 84, 120, 0.08); stroke: #2c5478; stroke-width: 0.8; }
+  .stage-num { font-size: 9px; font-weight: 700; fill: #2c5478; }
+  .stage-txt { font-size: 9px; fill: #1a1a1a; }
+  .redis-key { font-size: 8.5px; fill: #3a3a3a; }
+</style>
+<rect width="1320" height="920" fill="#f4f1ea"/>
+      <!-- Arrow markers -->
+      <defs>
+        <marker id="arr-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L9,5 L0,10 z" fill="#1a1a1a"/>
+        </marker>
+        <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L9,5 L0,10 z" fill="#b33a3a"/>
+        </marker>
+        <marker id="arr-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L9,5 L0,10 z" fill="#2c5478"/>
+        </marker>
+        <marker id="arr-ochre" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L9,5 L0,10 z" fill="#a67c2e"/>
+        </marker>
+      </defs>
+
+      <!-- ═══ Top lane: Adapter / Frontend ═══ -->
+      <g>
+        <rect x="30" y="30" width="210" height="90" class="svc-box-frontend" rx="2"/>
+        <text x="48" y="58" class="svc-header">llm-frontend</text>
+        <text x="48" y="74" class="svc-port">NGINX · REACT SPA · :8766</text>
+        <text x="48" y="98" class="svc-caption">+ New Chat · type prompt · render reply</text>
+        <text x="48" y="111" class="svc-caption">PoC only — bypasses adapter</text>
+      </g>
+
+      <!-- Sync HTTP lane to gateway -->
+      <g>
+        <path d="M240,75 L330,75" class="flow-line-http" marker-end="url(#arr-blue)"/>
+        <rect x="248" y="56" width="80" height="14" class="flow-label-bg"/>
+        <text x="252" y="67" class="flow-label" fill="#2c5478">POST /api</text>
+      </g>
+
+      <!-- ═══ GATEWAY (big container) ═══ -->
+      <g>
+        <rect x="330" y="30" width="560" height="420" class="svc-box-gateway" rx="3"/>
+        <text x="350" y="58" class="svc-header">ext-llm-gateway</text>
+        <text x="350" y="74" class="svc-port">GO · GIN · :7700</text>
+
+        <!-- Handler box -->
+        <rect x="352" y="96" width="220" height="78" class="inner-box"/>
+        <text x="362" y="114" class="inner-label" fill="#1a1a1a" font-weight="700">Gin Handler</text>
+        <text x="362" y="128" class="inner-label">POST /init_chat</text>
+        <text x="362" y="140" class="inner-label">POST /set_req_from_adapter</text>
+        <text x="362" y="152" class="inner-label">POST /set_req_from_adapter_sync</text>
+        <text x="362" y="166" class="inner-label" fill="#b33a3a" font-style="italic">  └─ PoC back door</text>
+
+        <!-- Mux box -->
+        <rect x="592" y="96" width="138" height="78" class="inner-box"/>
+        <text x="602" y="114" class="inner-label" font-weight="700">Mux</text>
+        <text x="602" y="128" class="inner-label">· orchestrator</text>
+        <text x="602" y="140" class="inner-label">· sequence keys</text>
+        <text x="602" y="152" class="inner-label">· session TTL</text>
+        <text x="602" y="166" class="inner-label">· atomic Lua</text>
+
+        <!-- Registry box -->
+        <rect x="750" y="96" width="118" height="78" class="inner-box"/>
+        <text x="760" y="114" class="inner-label" font-weight="700">Registry</text>
+        <text x="760" y="128" class="inner-label">· Handler</text>
+        <text x="760" y="140" class="inner-label">· Datasource</text>
+        <text x="760" y="152" class="inner-label">· Dispatcher</text>
+        <text x="760" y="166" class="inner-label" fill="#a67c2e" font-style="italic">reflection-like</text>
+
+        <!-- Internal handler→mux arrow -->
+        <path d="M572,135 L590,135" class="flow-line-solid" marker-end="url(#arr-ink)"/>
+        <!-- Mux→Registry -->
+        <path d="M730,135 L748,135" class="flow-line-ghost"/>
+
+        <!-- Workers container -->
+        <rect x="352" y="200" width="516" height="230" class="inner-box"/>
+        <text x="362" y="218" class="inner-label" font-weight="700">Worker goroutines <tspan fill="#6a6258">— N threads per stage</tspan></text>
+
+        <!-- Worker stage pills -->
+        <g transform="translate(362, 236)">
+          <!-- cipher_req -->
+          <rect x="0" y="0" width="496" height="40" class="stage-badge" rx="2"/>
+          <text x="12" y="16" class="stage-num">[0]</text>
+          <text x="36" y="16" class="stage-txt" font-weight="700">cipher_req</text>
+          <text x="36" y="30" class="stage-txt" fill="#6a6258">stream: WS_WorkerGrp-anonimyzer_WorkerInd0 · Dowork() ─► cipherer</text>
+
+          <!-- send_to_gemini -->
+          <rect x="0" y="46" width="496" height="40" class="stage-badge" rx="2"/>
+          <text x="12" y="62" class="stage-num">[1]</text>
+          <text x="36" y="62" class="stage-txt" font-weight="700">send_to_gemini</text>
+          <text x="36" y="76" class="stage-txt" fill="#6a6258">stream: WS_WorkerGrp-anonimyzer_WorkerInd1 · Dowork() ─► mediator</text>
+
+          <!-- decipher_resp -->
+          <rect x="0" y="92" width="496" height="40" class="stage-badge" rx="2"/>
+          <text x="12" y="108" class="stage-num">[2]</text>
+          <text x="36" y="108" class="stage-txt" font-weight="700">decipher_resp</text>
+          <text x="36" y="122" class="stage-txt" fill="#6a6258">stream: WS_WorkerGrp-anonimyzer_WorkerInd2 · Dowork() ─► cipherer</text>
+
+          <!-- _FINALIZER_ -->
+          <rect x="0" y="138" width="496" height="40" class="stage-badge" rx="2" fill="rgba(179,58,58,0.08)" stroke="#b33a3a"/>
+          <text x="12" y="154" class="stage-num" fill="#b33a3a">[3]</text>
+          <text x="36" y="154" class="stage-txt" font-weight="700">_FINALIZER_</text>
+          <text x="36" y="168" class="stage-txt" fill="#6a6258">stream: WS_WorkerGrp-anonimyzer_WorkerInd3 · writes STREAM&lt;chat_id&gt;</text>
+        </g>
+
+      </g>
+
+      <!-- ═══ REDIS (center bottom hub) ═══ -->
+      <g>
+        <rect x="330" y="500" width="560" height="220" class="svc-box-redis" rx="3"/>
+        <text x="350" y="528" class="svc-header">Redis</text>
+        <text x="350" y="544" class="svc-port">SHARED · :6379 · ACL-enabled</text>
+
+        <!-- Key regions -->
+        <g transform="translate(352, 562)">
+          <text x="0" y="0" class="inner-label" font-weight="700">Streams</text>
+          <text x="0" y="14" class="redis-key">WS_WorkerGrp-anon_WorkerInd{0..3}</text>
+          <text x="0" y="26" class="redis-key">STREAM_&lt;chat_id&gt;</text>
+
+          <text x="260" y="0" class="inner-label" font-weight="700">Keys</text>
+          <text x="260" y="14" class="redis-key">seq_NN_wrkind_NN_reqid_&lt;id&gt;</text>
+          <text x="260" y="26" class="redis-key">meta_workergroup_&lt;grp&gt;_reqid_&lt;id&gt;</text>
+
+          <text x="0" y="60" class="inner-label" font-weight="700">Session</text>
+          <text x="0" y="74" class="redis-key">SEQ_&lt;chat_id&gt;</text>
+          <text x="0" y="86" class="redis-key">METADATA_&lt;chat_id&gt;</text>
+
+          <text x="260" y="60" class="inner-label" font-weight="700">Bookkeeping</text>
+          <text x="260" y="74" class="redis-key">ZSet: anonimyzer_active_sessions</text>
+          <text x="260" y="86" class="redis-key" fill="#a67c2e">ACL: JIT users per-message</text>
+        </g>
+
+        <!-- Decorative Lua tag -->
+        <g transform="translate(760, 678)">
+          <rect x="0" y="0" width="120" height="26" fill="none" stroke="#b33a3a" stroke-width="0.8" stroke-dasharray="2 2"/>
+          <text x="8" y="16" class="redis-key" fill="#b33a3a">Lua: XACK + XADD</text>
+        </g>
+      </g>
+
+      <!-- Gateway → Redis connection (thick stream line) -->
+      <g>
+        <path d="M610,450 L610,500" class="flow-line-stream" marker-end="url(#arr-red)"/>
+        <rect x="615" y="465" width="86" height="14" class="flow-label-bg"/>
+        <text x="620" y="476" class="flow-label" fill="#b33a3a">streams + keys</text>
+      </g>
+
+      <!-- ═══ CIPHERER (left side) ═══ -->
+      <g>
+        <rect x="30" y="220" width="280" height="210" class="svc-box-cipher" rx="3"/>
+        <text x="48" y="248" class="svc-header">cipherer</text>
+        <text x="48" y="264" class="svc-port">PYTHON · FASTAPI · :8211</text>
+
+        <rect x="52" y="282" width="238" height="20" class="inner-box"/>
+        <text x="62" y="296" class="inner-label">POST /cipher · POST /decipher</text>
+
+        <rect x="52" y="312" width="238" height="20" class="inner-box"/>
+        <text x="62" y="326" class="inner-label">RedisCipherManager · JIT client</text>
+
+        <rect x="52" y="342" width="238" height="30" class="inner-box"/>
+        <text x="62" y="356" class="inner-label">PersonTagger</text>
+        <text x="62" y="366" class="inner-label" fill="#6a6258">spaCy + Flair + rapidfuzz</text>
+
+        <rect x="52" y="382" width="238" height="30" class="inner-box"/>
+        <text x="62" y="396" class="inner-label">PersonDataModel</text>
+        <text x="62" y="406" class="inner-label" fill="#6a6258">TTLCache (5 min)</text>
+      </g>
+
+      <!-- Gateway → Cipherer (HTTP) -->
+      <g>
+        <path d="M352,266 L310,266" class="flow-line-http" marker-end="url(#arr-blue)"/>
+        <rect x="258" y="244" width="58" height="14" class="flow-label-bg"/>
+        <text x="262" y="255" class="flow-label" fill="#2c5478">/cipher</text>
+        <rect x="258" y="258" width="80" height="14" class="flow-label-bg"/>
+        <text x="262" y="269" class="flow-label" fill="#2c5478">/decipher</text>
+      </g>
+
+      <!-- Cipherer → Redis (JIT ACL) -->
+      <g>
+        <path d="M170,430 L170,470 Q170,490 200,490 L350,490 L350,500" class="flow-line-acl" marker-end="url(#arr-ochre)"/>
+        <rect x="180" y="470" width="96" height="14" class="flow-label-bg"/>
+        <text x="184" y="481" class="flow-label" fill="#a67c2e">as JIT ACL user</text>
+      </g>
+
+      <!-- ═══ MEDIATOR (right side) ═══ -->
+      <g>
+        <rect x="910" y="220" width="280" height="210" class="svc-box-mediator" rx="3"/>
+        <text x="928" y="248" class="svc-header">llm-gemini-mediator</text>
+        <text x="928" y="264" class="svc-port">GO · GIN · :9111</text>
+
+        <rect x="932" y="282" width="238" height="20" class="inner-box"/>
+        <text x="942" y="296" class="inner-label">POST /gemini_redis_acl</text>
+
+        <rect x="932" y="312" width="238" height="30" class="inner-box"/>
+        <text x="942" y="326" class="inner-label">GeminiService</text>
+        <text x="942" y="336" class="inner-label" fill="#6a6258">session cache (10 min TTL)</text>
+
+        <rect x="932" y="352" width="238" height="30" class="inner-box"/>
+        <text x="942" y="366" class="inner-label">SessionProvider</text>
+        <text x="942" y="376" class="inner-label" fill="#6a6258">SIMPLE_GEMINI · MOCK</text>
+
+        <rect x="932" y="392" width="238" height="20" class="inner-box" stroke="#5d4b7a"/>
+        <text x="942" y="406" class="inner-label" fill="#5d4b7a">Google GenAI SDK · v1.42</text>
+      </g>
+
+      <!-- Gateway → Mediator (HTTP) -->
+      <g>
+        <path d="M890,266 L932,266" class="flow-line-http" marker-end="url(#arr-blue)"/>
+        <rect x="898" y="244" width="30" height="14" class="flow-label-bg"/>
+        <text x="902" y="255" class="flow-label" fill="#2c5478">POST</text>
+      </g>
+
+      <!-- Mediator → Redis (JIT ACL) -->
+      <g>
+        <path d="M1050,430 L1050,470 Q1050,490 1020,490 L870,490 L870,500" class="flow-line-acl" marker-end="url(#arr-ochre)"/>
+        <rect x="944" y="470" width="96" height="14" class="flow-label-bg"/>
+        <text x="948" y="481" class="flow-label" fill="#a67c2e">as JIT ACL user</text>
+      </g>
+
+      <!-- Mediator → Gemini API (external) -->
+      <g>
+        <path d="M1190,402 L1265,402" class="flow-line-http" marker-end="url(#arr-blue)"/>
+        <rect x="1200" y="382" width="80" height="14" class="flow-label-bg"/>
+        <text x="1204" y="393" class="flow-label" fill="#5d4b7a">Gemini API</text>
+        <circle cx="1285" cy="402" r="5" fill="none" stroke="#5d4b7a" stroke-width="1.2"/>
+        <circle cx="1285" cy="402" r="2" fill="#5d4b7a"/>
+        <text x="1225" y="420" class="flow-label" fill="#6a6258" font-size="8">external</text>
+      </g>
+
+      <!-- ═══ FINALIZER stream out to STREAM_<chat_id> ═══ -->
+      <g>
+        <!-- curved arrow from finalizer row back up to adapter stream -->
+        <path d="M610,420 L610,448 L910,448 L910,580 L890,580" class="flow-line-stream" marker-end="url(#arr-red)"/>
+        <text x="730" y="442" class="flow-label" fill="#b33a3a">XADD STREAM&lt;chat_id&gt;</text>
+      </g>
+
+      <!-- ═══ Adapter/Frontend reads STREAM_ back ═══ -->
+      <g>
+        <!-- Phantom line showing the read path -->
+        <path d="M30,620 Q30,700 150,700 L300,700 Q330,700 330,680 L330,600" class="flow-line-ghost"/>
+        <rect x="32" y="625" width="220" height="68" fill="rgba(255,255,255,0.5)" stroke="#6a6258" stroke-width="0.6" stroke-dasharray="2 2"/>
+        <text x="44" y="644" class="inner-label" font-weight="700">Adapter reader (conceptual)</text>
+        <text x="44" y="660" class="inner-label" fill="#6a6258">XREAD STREAMS STREAM&lt;id&gt; $</text>
+        <text x="44" y="674" class="inner-label" fill="#6a6258">authenticated as adapter_id</text>
+        <text x="44" y="688" class="inner-label" fill="#b33a3a" font-style="italic">(frontend uses sync-path)</text>
+      </g>
+
+      <!-- ═══ Bottom-of-diagram key counter ═══ -->
+      <g transform="translate(30, 758)">
+        <line x1="0" y1="0" x2="1260" y2="0" stroke="#1a1a1a" stroke-width="0.6"/>
+
+        <text x="0" y="22" class="inner-label" font-weight="700">FLOW OF A SINGLE TURN</text>
+        <text x="0" y="40" class="inner-label" fill="#6a6258">
+          <tspan fill="#2c5478" font-weight="700">①</tspan> browser ➝ nginx ➝ gateway sync
+          <tspan dx="12" fill="#2c5478" font-weight="700">②</tspan> gateway writes raw prompt + Lua-enqueues on WS[0]
+          <tspan dx="12" fill="#2c5478" font-weight="700">③</tspan> worker[0] mints JIT user ➝ POST /cipher
+        </text>
+        <text x="0" y="56" class="inner-label" fill="#6a6258">
+          <tspan fill="#2c5478" font-weight="700">④</tspan> cipherer NER-tags, writes anonymized content back
+          <tspan dx="12" fill="#2c5478" font-weight="700">⑤</tspan> Lua XACK+XADD ➝ WS[1]
+          <tspan dx="12" fill="#2c5478" font-weight="700">⑥</tspan> worker[1] mints JIT user ➝ POST /gemini_redis_acl
+        </text>
+        <text x="0" y="72" class="inner-label" fill="#6a6258">
+          <tspan fill="#2c5478" font-weight="700">⑦</tspan> mediator cache-hit or reconstruct ➝ Gemini ➝ write response
+          <tspan dx="12" fill="#2c5478" font-weight="700">⑧</tspan> Lua handoff ➝ WS[2] ➝ /decipher
+        </text>
+        <text x="0" y="88" class="inner-label" fill="#6a6258">
+          <tspan fill="#2c5478" font-weight="700">⑨</tspan> cipherer substitutes PER_xxx ➝ real names
+          <tspan dx="12" fill="#2c5478" font-weight="700">⑩</tspan> _FINALIZER_ XADDs permissions to STREAM&lt;id&gt;
+          <tspan dx="12" fill="#2c5478" font-weight="700">⑪</tspan> adapter (or sync endpoint) XREADs, resolves, responds
+        </text>
+      </g>
+
+    </svg>

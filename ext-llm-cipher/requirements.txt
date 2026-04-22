@@ -1,0 +1,10 @@
+fastapi==0.111.0
+uvicorn==0.25.0
+pydantic==2.12.5
+pytest==8.3.0
+spacy==3.8.11
+flair==0.15.1
+RapidFuzz==3.14.3
+cachetools==7.0.5
+redis[async]>=5.0.0
+

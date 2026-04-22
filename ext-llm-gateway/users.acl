@@ -1,0 +1,3 @@
+user limited_user on >password ~KEY_* +SET
+user adapter1 on >adapter1 ~* -@all
+user default on >mysecret allkeys allcommands
