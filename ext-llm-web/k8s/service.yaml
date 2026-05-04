@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ext-llm-web
+  labels:
+    app: ext-llm-web
+spec:
+  type: ClusterIP
+  selector:
+    app: ext-llm-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

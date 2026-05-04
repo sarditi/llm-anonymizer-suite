@@ -1,0 +1,12 @@
+{
+  "name": "ext-llm-web",
+  "short_name": "ext-llm-web",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "description": "ext-llm-web frontend",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "icons": []
+}

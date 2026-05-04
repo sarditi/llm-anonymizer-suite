@@ -1,0 +1,41 @@
+{
+    "server": {
+        "port": "9555",
+        "read_timeout_sec": 30,
+        "write_timeout_sec": 6000,
+        "shutdown_grace_sec": 10
+    },
+    "auth": {
+        "jwt_secret_env": "WEBADAPTER_JWT_SECRET_FILE",
+        "jwt_secret_inline": "dev-only-change-me-please-32+chars",
+        "jwt_ttl_seconds": 3600,
+        "issuer": "ext-llm-webadapter",
+        "users": [
+            {
+                "username": "admin",
+                "password_bcrypt": "$2a$10$cHsxD38jtRdF1ejEG//D7.GdKrIVtXvCiYOgllXSarNS4Kjy7CjjK"
+            }
+        ]
+    },
+    "gateway": {
+        "base_url": "http://host.docker.internal:7700",
+        "adapter_id": "ada1",
+        "default_llm": "chatgpt",
+        "request_timeout_seconds": 6000
+    },
+    "redis": {
+        "addr": "redis:6379",
+        "stream_block_seconds": 6000,
+        "dial_timeout_seconds": 5
+    },
+    "sessions": {
+        "ttl_seconds": 3600
+    },
+    "cors": {
+        "allowed_origins": ["*"],
+        "allowed_methods": ["GET", "POST", "OPTIONS"],
+        "allowed_headers": ["Authorization", "Content-Type"],
+        "allow_credentials": false,
+        "max_age_seconds": 600
+    }
+}

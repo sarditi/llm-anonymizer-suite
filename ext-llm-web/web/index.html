@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="ext-llm-web frontend">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="ext-llm-web">
+
+  <link rel="manifest" href="manifest.json">
+
+  <title>ext-llm-web</title>
+
+  <!--
+    Runtime config injected by the static server. Without this script the app
+    falls back to "/api/v1" which assumes the webadapter is reverse-proxied at
+    the same origin. In Kubernetes you typically override via a ConfigMap that
+    sets WEBADAPTER_BASE_URL.
+  -->
+  <script src="config.js"></script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

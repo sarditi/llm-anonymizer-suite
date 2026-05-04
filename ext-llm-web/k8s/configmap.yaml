@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ext-llm-web-config
+data:
+  # Set to the in-cluster URL of the webadapter, e.g.
+  #   http://ext-llm-webadapter.default.svc.cluster.local:9555
+  # The webadapter must be reachable from the user's *browser* (CORS aside),
+  # not just the pod. If your ingress terminates TLS and forwards /api to the
+  # webadapter, set this to https://your-host.example.com instead.
+  WEBADAPTER_BASE_URL: "http://ext-llm-webadapter:9555"
+  APP_TITLE: "ext-llm-web"

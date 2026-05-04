@@ -1,0 +1,30 @@
+# Optional: example Ingress that exposes ext-llm-web at /, and proxies
+# /api/v1/* through to the webadapter so the browser sees a single origin (no
+# CORS issues). Adjust host, ingressClassName, and TLS to fit your cluster.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ext-llm-web
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "6000"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ext-llm.example.com
+      http:
+        paths:
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: ext-llm-webadapter
+                port:
+                  number: 9555
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ext-llm-web
+                port:
+                  number: 80
