@@ -1,8 +1,7 @@
 {
-  "internal_chat_id": "55dccf19-7bed-4649-8517-3c3aa15e445a",
-  "request_key": "00_f9b63ac4-144a-475a-9ae9-d47b419954d1",
+  "internal_chat_id": "55ed0cc9-429f-4a4c-b952-ac9668e8a1a8",
+  "request_key": "01_e84c6adb-1351-44c0-a056-658a2905975a",
   "content":{
     "input_text":"Hi, I'm currently working with John Carter at Acme Corp's New York office on a monitoring issue related to our Datadog setup, and he mentioned something about improving “alert fidelity.” I understand it has to do with making alerts better, but I'm not entirely clear on what that practically means. For example, does it relate more to reducing noise, improving thresholds, or enriching alerts with more context? John briefly touched on it during a call, but I'd like a clearer explanation so I can align with what he expects."
   }
 }
-

@@ -3,6 +3,7 @@ module llm-gemini-mediator
 go 1.25.5
 
 require (
+	ext-llm-common v0.0.0-00010101000000-000000000000
 	ext-llm-gateway v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.11.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -56,5 +57,7 @@ require (
 	google.golang.org/grpc v1.76.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
 )
+
+replace ext-llm-common => /Users/sagi.arditi/gptanonym/llm-anonymizer-suite/ext-llm-common
 
 replace ext-llm-gateway => /Users/sagi.arditi/gptanonym/llm-anonymizer-suite/ext-llm-gateway

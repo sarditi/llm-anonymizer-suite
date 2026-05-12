@@ -4,10 +4,10 @@ RUN apk add --no-cache git ca-certificates
 
 WORKDIR /app
 
-COPY ext-llm-gateway/logger ./ext-llm-gateway/logger
-COPY ext-llm-gateway/models ./ext-llm-gateway/models
+COPY ext-llm-common ./ext-llm-common
+
 COPY ext-llm-gateway/utils ./ext-llm-gateway/utils
-COPY ext-llm-gateway/go.mod ./ext-llm-gateway/go.mod
+COPY ext-llm-gateway/go.mod.docker ./ext-llm-gateway/go.mod
 
 
 COPY llm-gemini-mediator/go.sum ./

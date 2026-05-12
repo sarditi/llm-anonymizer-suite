@@ -1,7 +1,7 @@
 package dispatchers
 
 import (
-    "ext-llm-gateway/models"
+    "ext-llm-common/models"
 
     "fmt"
 )

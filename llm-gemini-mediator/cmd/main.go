@@ -2,7 +2,7 @@ package main
 
 
 import (
-	"ext-llm-gateway/logger"
+	"ext-llm-common/logger"
 
 	"os"
 	"context"

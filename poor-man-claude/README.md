@@ -1,0 +1,222 @@
+# Poor Man's Claude Agent (VS Code Extension)
+
+A minimal VS Code extension that emulates a Claude-style cloud agent flow without any direct API integration. You type a change request; the extension assembles a code-transformation prompt (your prompt + the scanned codebase) into a single text file, asks you to upload that file to Claude as an attachment and reply "Execute". Claude returns a single bash script which you place into a configured Download directory; the extension picks it up, marks it executable, runs it, streams the colored output, and lets you roll back the changes.
+
+> Internal name: `poors-man-claudeagent` — directory: `poor-man-claude`.
+
+---
+
+## What it does (flow)
+
+1. You configure three things in settings:
+   - **Codebase directories** (one or more) — scanned recursively for context.
+   - **Upload directory** — where the assembled prompt file is written.
+   - **Download directory** — where the bash script returned by Claude is expected.
+2. You start a session in the sidebar (Claude-style left panel) and type a prompt.
+3. The extension:
+   - Picks 4 keywords from your prompt (frequency + stop-word filter, no real corpus IDF).
+   - Builds a script base name: `<word1>_<word2>_<word3>_<word4>_YYYY-MM-DD_HH_MM_SS`.
+   - Writes a prompt file `<baseName>.txt` to the Upload directory containing:
+     - The full instructions block (`=== PROMPT_START ===` … `=== PROMPT_END ===`)
+     - Your change request between `=== CHANGE_REQUEST_START ===` and `=== CHANGE_REQUEST_END ===`
+     - The script name (`<baseName>`) between `=== SCRIPT_NAME_START ===` and `=== SCRIPT_NAME_END ===`
+     - The rollback directory `~/.poor_mans_claude/<baseName>` between `=== ROLLBACK_DIR_START ===` and `=== ROLLBACK_DIR_END ===`
+     - The codebase between `=== CODEBASE_START ===` and `=== CODEBASE_END ===`, with each file delimited by full-path `=== FILE_START: /full/path ===` / `=== FILE_END: /full/path ===` markers.
+4. A notification asks you to upload that file to Claude and type "Execute". Claude returns a single bash script.
+5. You save Claude's reply as `<baseName>.sh` in the Download directory.
+6. The extension is polling that directory (fs.watch + 1.5 s interval). When the file appears and is size-stable, it `chmod +x` it and spawns it.
+7. Standard output is streamed line-by-line into the session view with a color scheme:
+   - `=== ... ===` lines: dark-navy background, bright-cyan bold text.
+   - `REASON:` lines: soft yellow.
+   - `DIFF:` lines: soft green.
+   - `NOT_DO:` lines (without `REASON:`): bright orange, bold.
+   - `NOT_DO: REASON:` lines: muted orange, italic.
+   - General output: dark GitHub terminal background `#0d1117`, monospace, 13 px.
+8. After the script exits, a **Rollback** button is enabled. It runs the same script with `--rollback`. If more than 60 minutes have passed, the script's own `=== ERROR: Rollback window has expired. ===` message is surfaced as-is (the extension does not reimplement the rollback logic).
+
+The extension performs **only file I/O and local script execution** — it does not call any network service, including Anthropic's API.
+
+---
+
+## File-type filter
+
+The recursive scan excludes:
+
+- Binaries by extension: `.exe .dll .so .dylib .a .o .class .jar .war .pyc .pyo .pyd .wasm`.
+- Media/archives: `.png .jpg .jpeg .gif .ico .bmp .tiff .webp .svg .pdf .zip .tar .gz .tgz .7z .rar .bz2 .xz .mp3 .mp4 .mov .avi .mkv .wav .flac .ogg .ttf .otf .woff .woff2 .eot`.
+- Map / lock files: `*.map`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `poetry.lock`, `Pipfile.lock`, `Cargo.lock`, `composer.lock`, `Gemfile.lock`, `pubspec.lock`, `go.sum`.
+- Generated dirs: `node_modules`, `dist`, `build`, `out`, `target`, `.next`, `.turbo`, `.parcel-cache`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.venv`, `venv`, `env`, `.dart_tool`, `.flutter-plugins`, `.gradle`, `.cache`, `coverage`, `.nyc_output`.
+- Generated files: `*.g.dart`, `*.freezed.dart`, `*.mocks.dart`, anything in `*.egg-info`.
+- VCS/IDE: `.git`, `.svn`, `.hg`, `.idea`, `.vscode`, `.DS_Store`, `Thumbs.db`.
+- Symlinks (skipped).
+- Files larger than `poorMansClaude.maxFileBytes` (default 256 KB).
+- Anything flagged as binary by a UTF-8 / null-byte sniff.
+
+READMEs and other text files are included.
+
+---
+
+## Settings
+
+Configured in VS Code settings (`Cmd ,` → search "Poor Man's Claude") or `settings.json`:
+
+| Setting | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `poorMansClaude.codebaseDirs` | `string[]` | `[]` | Roots scanned recursively. Resolved to absolute paths; `~` expanded. |
+| `poorMansClaude.uploadDir` | `string` | `""` | Where the prompt file is written. R/W access verified. |
+| `poorMansClaude.downloadDir` | `string` | `""` | Polled for the returned bash script. R/W access verified. |
+| `poorMansClaude.maxFileBytes` | `number` | `262144` | Per-file size cap during scan. |
+| `poorMansClaude.maxTotalBytes` | `number` | `10485760` | Soft cap on assembled prompt; warns when exceeded. |
+
+There are also helper commands (Cmd + Shift + P):
+
+- **Poor Man's Claude: Pick Upload Directory**
+- **Poor Man's Claude: Pick Download Directory**
+- **Poor Man's Claude: Add Codebase Directory**
+- **Poor Man's Claude: Open Settings**
+
+Sessions are stored in VS Code **global state** (so they persist across windows / projects).
+
+---
+
+## Local development & testing
+
+### Prerequisites
+
+- Node.js ≥ 18 and npm.
+- VS Code ≥ 1.85.
+
+### 1. Install dependencies
+
+```bash
+cd /Users/sagi.arditi/gptanonym/llm-anonymizer-suite/poor-man-claude
+npm install
+```
+
+### 2. Compile
+
+```bash
+npm run compile
+```
+
+`tsc` writes JavaScript to `out/`. Use `npm run watch` during development.
+
+### 3. Launch the Extension Development Host
+
+Open the `poor-man-claude` folder in VS Code and press **F5** (or pick "Run Extension" from the Run/Debug menu). A second VS Code window opens with the extension loaded.
+
+In that second window:
+
+1. Click the new shield icon in the activity bar (Poor Man's Claude).
+2. Open `Cmd ,` → search "Poor Man's Claude" → fill in the three directories.
+3. Click "+ New" in the Sessions panel, type a prompt, hit **Send** (or `Cmd/Ctrl + Enter`).
+4. The extension writes `<base>.txt` to the Upload directory and shows an info popup. Upload that file to Claude as an attachment and type "Execute" in the prompt.
+5. Save Claude's reply as `<base>.sh` in the Download directory. The extension picks it up automatically and runs it.
+6. After it finishes, the **Rollback** button is enabled. Press it within 60 minutes to undo.
+
+### 4. Manual smoke test without Claude
+
+You can fake the round trip with a hand-written bash script:
+
+```bash
+cat > /your/download/dir/test_test_test_test_2026-05-08_14_30_00.sh <<'EOF'
+#!/bin/bash
+ROLLBACK_DIR="$HOME/.poor_mans_claude/test_test_test_test_2026-05-08_14_30_00"
+if [[ "$1" == "--rollback" ]]; then
+  if [[ ! -d "$ROLLBACK_DIR" ]]; then
+    echo "=== ERROR: Rollback window has expired. Backup no longer available. ==="; exit 1
+  fi
+  echo "=== Rolled back nothing (smoke test) ==="
+  rm -rf "$ROLLBACK_DIR"
+  echo "=== Rollback complete. All files restored to original state. ==="
+  exit 0
+fi
+mkdir -p "$ROLLBACK_DIR"
+echo "=== Modifying nothing (smoke test) ==="
+echo "REASON: smoke test"
+echo "DIFF: nothing -> nothing"
+echo "NOT_DO: example unsupported op"
+echo "NOT_DO: REASON: example reason"
+echo "=== All changes applied. Run with --rollback to undo within 60 minutes. ==="
+EOF
+```
+
+In the extension, type a prompt that summarises to those four words (e.g. "test test test test work") and Send. The extension will write the upload file, then watch the Download dir until you save the script there.
+
+---
+
+## Packaging & distribution
+
+### Option A — share a `.vsix` file (recommended for internal distribution)
+
+1. Install `vsce` once (globally or as a dev dep):
+   ```bash
+   npm i -g @vscode/vsce
+   ```
+2. From `poor-man-claude/`:
+   ```bash
+   npm run compile
+   vsce package
+   ```
+   This produces `poors-man-claudeagent-0.1.0.vsix`.
+3. Distribute the `.vsix` (Slack, shared drive, internal artifact store).
+4. Recipients install with **either**:
+   - `code --install-extension poors-man-claudeagent-0.1.0.vsix`, or
+   - VS Code → Extensions panel → `…` menu → **Install from VSIX…**.
+
+### Option B — publish to the VS Code Marketplace (public)
+
+1. Create a publisher at <https://marketplace.visualstudio.com/manage>.
+2. Update the `"publisher"` field in [package.json](package.json) from `dentsplysirona-local` to your real publisher id.
+3. Generate a Personal Access Token in Azure DevOps with **Marketplace → Manage** scope.
+4. `vsce login <publisher>` then `vsce publish` (or `vsce publish minor` / `patch`).
+
+> ⚠️ Before publishing publicly, audit the extension and remove anything organisation-internal (URLs, file paths, sample data). The Marketplace listing is public and indexed.
+
+### Option C — private registry
+
+If you have an internal Open VSX or private extension registry, build the `.vsix` per Option A and follow that registry's upload procedure (e.g. `ovsx publish *.vsix` for Open VSX).
+
+---
+
+## Repository layout
+
+```
+poor-man-claude/
+├── package.json               # extension manifest, settings, commands
+├── tsconfig.json
+├── .vscodeignore
+├── .vscode/launch.json        # F5 launch config
+├── media/
+│   ├── icon.svg               # activity bar icon
+│   ├── style.css              # webview styles incl. output color scheme
+│   └── webview.js             # webview controller
+├── src/
+│   ├── extension.ts           # activate/deactivate, command registration
+│   ├── sidebarProvider.ts     # webview view + flow orchestration
+│   ├── sessions.ts            # global-state session store
+│   ├── settings.ts            # settings reader, validation, dir pickers
+│   ├── tfidf.ts               # 4-word summary + timestamp helpers
+│   ├── codebaseScanner.ts     # recursive scan + denylist + binary sniff
+│   ├── promptBuilder.ts       # embedded template + substitution
+│   ├── poller.ts              # fs.watch + 1.5 s interval
+│   └── scriptRunner.ts        # chmod + spawn + line-buffered streaming
+└── README.md
+```
+
+---
+
+## Known limitations
+
+- The 4-keyword summariser uses term frequency and an English stop-word list. There is no real corpus IDF — TF-IDF is undefined for a single document.
+- `chmod 0755` and `spawn` work on macOS / Linux. On Windows, `bash` is not the default shell; this extension targets Unix-like environments.
+- The extension does not validate or sandbox what Claude's script does. Treat the Download directory like any other place where a script you are about to execute can land. Review the script before running if you don't trust the source.
+- Session state lives in VS Code global state. Clearing it (`Developer: Reset Global State` etc.) wipes the history.
+
+---
+
+## Security notes
+
+- The extension never reads or transmits anything outside the configured Codebase / Upload / Download directories.
+- It does not make network requests.
+- Avoid putting secrets, PHI, or other regulated data in the codebase directories: their contents are written into a plain-text upload file that you will hand to Claude.

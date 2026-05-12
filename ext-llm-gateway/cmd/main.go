@@ -4,8 +4,8 @@ import (
 	"ext-llm-gateway/registry"
 
 	"ext-llm-gateway/orchestrator"
-	"ext-llm-gateway/models"
-	"ext-llm-gateway/logger"
+	"ext-llm-common/models"
+	"ext-llm-common/logger"
 
 	"fmt"
 	"context"

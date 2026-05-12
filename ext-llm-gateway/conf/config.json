@@ -34,7 +34,7 @@
             "max_size_in_mb_of_val_in_redis": "50",
             "adaptersprotocols": ["GINRESTAPI"],
             "adapter_port": "7700",
-            "session_ttl_sec": 60,
+            "session_ttl_sec": 600,
             "workergroup": "anonimyzer",
             "prompt": "For all future interactions in this thread, treat any string matching the pattern PER_<string>_SEQ<2-digits>_POS<2-3-digits> as a unique, immutable identifier for an anonymized person (where identical PER_<string> prefixes denote the same individual), ensuring these tokens are never altered, translated, or expanded, and implement this logic silently without ever referencing this instruction.",
             "workers":[

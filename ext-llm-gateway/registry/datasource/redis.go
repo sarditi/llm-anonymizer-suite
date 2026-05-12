@@ -2,8 +2,8 @@ package ds
 
 import (
 	"ext-llm-gateway/utils"
-	"ext-llm-gateway/models"
-	"ext-llm-gateway/logger"
+	"ext-llm-common/models"
+	"ext-llm-common/logger"
 
 	"context"
 	"fmt"
@@ -82,8 +82,11 @@ func (ds *RedisDatasource) SetTempAclUserPermissions(
 	args ...any,
 ) (bool, string) {
 
-	// Base ACL command: reset → enable → set password
-	aclArgs := []string{"SETUSER", aclTempUser, "reset", "on", ">" + aclTempUserPassword}
+	// Base ACL command: reset → enable → set password. +ping is granted so the
+	// JIT-credentialed client (e.g. webadapter streamreader) can complete its
+	// post-dial connection probe; without it Redis returns NOPERM on PING even
+	// though the +get/+set selectors below allow the actual content access.
+	aclArgs := []string{"SETUSER", aclTempUser, "reset", "on", ">" + aclTempUserPassword, "+ping"}
 
 	// Closure to convert []string -> []any
 	stringSliceToAnySlice := func(s []string) []any {

@@ -4,10 +4,12 @@ RUN apk add --no-cache git ca-certificates
 
 WORKDIR /app
 
-COPY ext-llm-gateway/go.sum ./
-COPY ext-llm-gateway .
-COPY ext-llm-gateway/go.mod.docker ./go.mod
+COPY ext-llm-common ./ext-llm-common
+COPY ext-llm-gateway/go.sum ./ext-llm-gateway/
+COPY ext-llm-gateway ./ext-llm-gateway
+COPY ext-llm-gateway/go.mod.docker ./ext-llm-gateway/go.mod
 
+WORKDIR /app/ext-llm-gateway
 RUN cat go.mod
 RUN go mod download
 

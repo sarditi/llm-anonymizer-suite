@@ -1,0 +1,95 @@
+{
+  "name": "poors-man-claudeagent",
+  "displayName": "Poor Man's Claude Agent",
+  "description": "Emulates a cloud agent flow: build a code-transformation prompt, watch a download directory for the resulting bash script, execute it, and rollback.",
+  "version": "0.1.0",
+  "publisher": "dentsplysirona-local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onView:poorMansClaude.main"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "poorMansClaude",
+          "title": "Poor Man's Claude",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "poorMansClaude": [
+        {
+          "type": "webview",
+          "id": "poorMansClaude.main",
+          "name": "Sessions"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "poorMansClaude.openSettings",
+        "title": "Poor Man's Claude: Open Settings"
+      },
+      {
+        "command": "poorMansClaude.pickUploadDir",
+        "title": "Poor Man's Claude: Pick Upload Directory"
+      },
+      {
+        "command": "poorMansClaude.pickDownloadDir",
+        "title": "Poor Man's Claude: Pick Download Directory"
+      },
+      {
+        "command": "poorMansClaude.addCodebaseDir",
+        "title": "Poor Man's Claude: Add Codebase Directory"
+      }
+    ],
+    "configuration": {
+      "title": "Poor Man's Claude",
+      "properties": {
+        "poorMansClaude.codebaseDirs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "One or more directories to scan recursively as the codebase context."
+        },
+        "poorMansClaude.uploadDir": {
+          "type": "string",
+          "default": "",
+          "description": "Directory where the generated prompt file will be placed for upload to Claude."
+        },
+        "poorMansClaude.downloadDir": {
+          "type": "string",
+          "default": "",
+          "description": "Directory the extension polls for the bash script returned by Claude."
+        },
+        "poorMansClaude.maxFileBytes": {
+          "type": "number",
+          "default": 262144,
+          "description": "Maximum size per scanned file (bytes). Files larger than this are skipped."
+        },
+        "poorMansClaude.maxTotalBytes": {
+          "type": "number",
+          "default": 10485760,
+          "description": "Soft cap on total assembled prompt size (bytes). A warning is shown if exceeded."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}

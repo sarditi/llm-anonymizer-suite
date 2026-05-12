@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"ext-llm-gateway/models"
+	"ext-llm-common/models"
 	"ext-llm-gateway/utils"
-	"ext-llm-gateway/logger"
+	"ext-llm-common/logger"
 	"ext-llm-gateway/orchestrator"
 
 	"encoding/json"

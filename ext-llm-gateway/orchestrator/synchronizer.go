@@ -1,8 +1,8 @@
 package orchestrator
 
 import (
-	"ext-llm-gateway/models"
-	"ext-llm-gateway/logger"
+	"ext-llm-common/models"
+	"ext-llm-common/logger"
 	"ext-llm-gateway/utils"
 
 	"context"
@@ -147,7 +147,7 @@ func (ds *SynchRedisDatasource) AdapterStreamCreation(adapter string, key string
 	}
 	// Define read-only user for the adapter
 	pwd := uuid.New().String()
-	if err := ds.Rdb.Do(*ds.Ctx, "ACL", "SETUSER", adapter, "on", ">" + pwd, "~"+adapterReqStream, "+XREAD", "+xdel", "-xadd").Err(); err != nil {
+	if err := ds.Rdb.Do(*ds.Ctx, "ACL", "SETUSER", adapter, "on", ">" + pwd, "~"+adapterReqStream, "+XREAD", "+xdel", "-xadd", "+ping").Err(); err != nil {
 		logger.Log.Fatal("Error setting readonly permissions for Q " + adapterReqStream + " to user " + adapter + " in REDIS " + err.Error())
 		return false, "Error setting readonly permissions for Q " + adapterReqStream + " to user " + adapter + " in REDIS " + err.Error(), ""
 	}

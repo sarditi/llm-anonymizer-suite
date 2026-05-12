@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"ext-llm-gateway/orchestrator"
-	"ext-llm-gateway/models"
-	"ext-llm-gateway/logger"
+	"ext-llm-common/models"
+	"ext-llm-common/logger"
 	"ext-llm-gateway/utils"
 	"fmt"
 

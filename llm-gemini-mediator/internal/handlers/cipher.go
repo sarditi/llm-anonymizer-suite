@@ -3,10 +3,10 @@ package handlers
 
 import (
 
-	"ext-llm-gateway/models"
+	"ext-llm-common/models"
 	//"llm-gemini-mediator/internal/redisacl"
 	"llm-gemini-mediator/internal/ai"
-	"ext-llm-gateway/logger"
+	"ext-llm-common/logger"
 
 	"net/http"
 	"context"

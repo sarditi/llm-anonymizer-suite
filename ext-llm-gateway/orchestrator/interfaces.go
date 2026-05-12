@@ -1,7 +1,7 @@
 package orchestrator
 
 import (
-	"ext-llm-gateway/models"
+	"ext-llm-common/models"
 )
 
 //Any handler used for the worker group (we curremntlu use HTTP but it can be gRPC or any other) should comply to the interface

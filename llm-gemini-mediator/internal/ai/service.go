@@ -1,8 +1,8 @@
 package ai
 
 import (
-	"ext-llm-gateway/logger"
-	"ext-llm-gateway/models"
+	"ext-llm-common/logger"
+	"ext-llm-common/models"
 	"ext-llm-gateway/utils"
 
 	"context"

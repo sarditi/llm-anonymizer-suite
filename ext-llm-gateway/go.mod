@@ -3,12 +3,15 @@ module ext-llm-gateway
 go 1.25.5
 
 require (
+	ext-llm-common v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.11.0
 	github.com/gojek/heimdall/v7 v7.0.3
 	github.com/google/uuid v1.6.0
 	github.com/redis/go-redis/v9 v9.0.1
 	google.golang.org/grpc v1.76.0
 )
+
+replace ext-llm-common => /Users/sagi.arditi/gptanonym/llm-anonymizer-suite/ext-llm-common
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect
